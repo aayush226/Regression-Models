@@ -1,0 +1,95 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+# **Regression Model Course Project**
+**Aayush Shah**
+
+## **Executive Summary**
+
+This project was created as per the requirement of the coursera peer assignment as follows;
+
+You work for Motor Trend, a magazine about the automobile industry. Looking at a data set of a collection of cars, they are interested in exploring the relationship between a set of variables and miles per gallon (MPG) (outcome). They are particularly interested in the following two questions:
+
+“Is an automatic or manual transmission better for MPG”
+"Quantify the MPG difference between automatic and manual transmissions"
+
+This project involves exploring the _mtcars_ dataset in R.
+
+## **Data Exploration**
+
+```{r echo=TRUE,cache=TRUE}
+library(datasets)
+data("mtcars")
+library(ggplot2)
+head(mtcars)
+```
+
+We have loaded the dataset _mtcars_. But we need to convert _vs_, _am_, _gear_ and _carb_ columns as factors and add a new column **transmission** type depending on _automatic_ and _manual_ types.
+
+```{r echo=TRUE,cache=TRUE}
+mtcars$vs <- factor(mtcars$vs)
+mtcars$transmission <- factor(mtcars$am,labels=c("Automatic","Manual"))
+mtcars$gear <- factor(mtcars$gear)
+mtcars$carb <- factor(mtcars$carb)
+head(mtcars)
+summary(mtcars$mpg)
+```
+
+We now illustrate relationship between _mpg_ and _transmission_ variables.
+
+```{r echo=TRUE,cache=TRUE}
+boxplot(mpg ~ transmission, data = mtcars, col = (c("green","yellow")), ylab = "MPG", xlab = "Transmission Type")
+```
+
+As we see, _Manual Transmission_ type gives a _better_ MPG than _Automatic Transmission_.But lets explore it further.
+
+## **Regression Analysis**
+
+Let _mpg_ be the dependent variable and _transmission_ be the independent variable. Lets fit a linear model now,
+
+```{r echo=TRUE,cache=TRUE}
+fit<-lm(mpg~transmission,mtcars)
+summary(fit)
+```
+
+As we see, The R-Squared value is 0.338 which means that only 33.8% of the regression variance can be explained by our model.Also We see that Manual transmission yields on average 7 MPG more than Automatic.
+
+Lets explore relationship of other variables on mpg using analysis  of variance.
+
+```{r echo=TRUE,cache=TRUE}
+Varianceanalysis<-aov(mpg ~ ., data = mtcars)
+summary(Varianceanalysis)
+```
+
+Using the p values which are less than 0.5, we see that _cyl_, _disp_, and _wt_ variables must be considered along with _transmission_ type to explain relationship with mpg.
+
+```{r echo=TRUE, cache=TRUE}
+fit2<-lm(mpg~cyl + disp + wt + transmission, data = mtcars)
+summary(fit2)
+```
+
+We see that now about 80% or more variance can be explained by considering variables _cyl_, _disp_, and _wt_ along with _transmission_.
+
+The P-values of _wt_ and _cyl_ are less than 0.5 which tells us that these are important variables in explaining relation between _transmission_ type and _mpg_.
+
+Now lets do a residual plot of this multivariable model( _fit2_ )
+
+```{r echo=TRUE, cache=TRUE}
+par(mfrow = c(2,2))
+plot(fit2)
+```
+
+So, it seems that the fit of the multivariable model _fit2_ and its residuals seem to satisfy basic requirement for a linear model to explain the variation of the variable _mpg_.
+
+## **Conclusion**
+
+#### **Is an automatic or manual transmission better for MPG?**
+
+Manual transmission cars appear to be better for mpg compared to Automatic cars. But with a multivariable model with confounding variables _cyl_, _disp_, and _wt_ the difference is less significant.
+
+#### **Quantify the MPG difference between automatic and manual transmissions?**
+
+Using only _transmission_ variable, manual cars yield on average 7 MPG more than automatic cars. But when variables _cyl_, _disp_, and _wt_ are included the average goes down to a lesser value.
+
